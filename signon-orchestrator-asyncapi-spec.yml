@@ -1,0 +1,134 @@
+# Copyright 2021-2023 FINCONS GROUP AG within the Horizon 2020
+# European project SignON under grant agreement no. 101017255.
+
+# Licensed under the Apache License, Version 2.0 (the "License"); 
+# you may not use this file except in compliance with the License. 
+# You may obtain a copy of the License at 
+
+#     http://www.apache.org/licenses/LICENSE-2.0 
+
+# Unless required by applicable law or agreed to in writing, software 
+# distributed under the License is distributed on an "AS IS" BASIS, 
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+# See the License for the specific language governing permissions and 
+# limitations under the License.
+
+asyncapi: '2.2.0'
+info:
+  title: Async API - SignON Project
+  version: '8.0.1'
+  description: The API describes precisely the communications messages between
+    the Orchestrator and the Pipeline.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  rabbitmq:
+    url: localhost:5672
+    description: RabbitMQ
+    protocol: amqp
+
+defaultContentType: application/json
+
+channels:
+  SignON:
+    publish:
+      operationId: Publish Message
+      description: Payload of received order
+      message:
+        $ref: '#/components/messages/OrchestratorToPipeline'
+      bindings:
+        amqp:
+          timestamp: true
+          ack: false
+          cc: ['SignONRoutingKey']
+    subscribe:
+      operationId: Subscribe Message
+      description: Payload of received order
+      message:
+        oneOf:
+          - $ref: '#/components/messages/PipelineToOrchestrator'
+          - $ref: '#/components/messages/Error'
+    bindings:
+      amqp:
+        is: routingKey
+        exchange:
+          name: SignONExchange
+          type: direct
+
+components:
+  messages:
+    OrchestratorToPipeline:
+      name: OrchestratorMessage
+      title: Message from Orchestrator to Pipeline (WP3)
+      summary: Message that will be sent from the Orchestrator to the Pipeline
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/OrchestratorToPipeline"
+
+    PipelineToOrchestrator:
+      name: OrchestratorMessage
+      title: Message from Pipeline (WP5) to Orchestrator
+      summary: Message that will be sent from the Pipeline to the Orchestrator
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/PipelineToOrchestrator"
+
+    Error:
+      name: OrchestratorMessage
+      title: Error Message 
+      summary: Error Message 
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/Error'
+
+  schemas:
+    OrchestratorToPipeline:
+      type: object
+      description: Schema for the message sent from the Orchestrator to the
+        Pipeline (WP3) Orchestrator
+      properties:
+        App:
+          $ref: "#/components/schemas/App"
+        OrchestratorRequest:
+          $ref: "#/components/schemas/OrchestratorRequest"
+
+    PipelineToOrchestrator:
+      type: object
+      description: Schema for the message sent from the Pipeline (WP5) to the
+        Orchestrator
+      properties:
+        App:
+          $ref: "#/components/schemas/App"
+        OrchestratorRequest:
+          $ref: "#/components/schemas/OrchestratorRequest"
+        RabbitMQ:
+          $ref: "#/components/schemas/RabbitMQ"
+        SourceLanguageProcessing:
+          $ref: "#/components/schemas/SourceLanguageProcessing"
+        IntermediateRepresentation:
+          $ref: "#/components/schemas/IntermediateRepresentation"
+        MessageSynthesis:
+          $ref: "#/components/schemas/MessageSynthesis"
+
+    Error:
+      $ref: 'signon-orchestrator-shared-schemas/signon-orchestrator-shared-schemas.yml#/sharedSchemas/Error'
+
+    App:
+      $ref: 'signon-orchestrator-shared-schemas/signon-orchestrator-shared-schemas.yml#/sharedSchemas/App'
+
+    OrchestratorRequest:
+      $ref: 'signon-orchestrator-shared-schemas/signon-orchestrator-shared-schemas.yml#/sharedSchemas/OrchestratorRequest'
+
+    RabbitMQ:
+      $ref: 'signon-orchestrator-shared-schemas/signon-orchestrator-shared-schemas.yml#/sharedSchemas/RabbitMQ'
+
+    SourceLanguageProcessing:
+      $ref: 'signon-orchestrator-shared-schemas/signon-orchestrator-shared-schemas.yml#/sharedSchemas/SourceLanguageProcessing'
+
+    IntermediateRepresentation:
+      $ref: 'signon-orchestrator-shared-schemas/signon-orchestrator-shared-schemas.yml#/sharedSchemas/IntermediateRepresentation'
+
+    MessageSynthesis:
+      $ref: 'signon-orchestrator-shared-schemas/signon-orchestrator-shared-schemas.yml#/sharedSchemas/MessageSynthesis'

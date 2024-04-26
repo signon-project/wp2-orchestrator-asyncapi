@@ -1,0 +1,3 @@
+[submodule "signon-orchestrator-shared-schemas"]
+	path = signon-orchestrator-shared-schemas
+	url = https://github.com/signon-project/wp2-orchestrator-api-shared-schemas.git
